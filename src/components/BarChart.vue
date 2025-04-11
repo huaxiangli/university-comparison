@@ -107,9 +107,9 @@ export default {
         series: this.chartData.labels.map((label, index) => ({
           name: label,
           type: 'bar',
-          barGap: '-100%',
           stack: 'total',
           barWidth: '60%',
+          color:'#FFF8E6',
           itemStyle: {
             color: indicatorColors[label]
           },
@@ -119,7 +119,7 @@ export default {
             formatter: '{c}'
           },
           data: this.chartData.datasets.map(item => item.data[index])
-        }))
+        })),
       }
     }
   }
@@ -129,7 +129,7 @@ export default {
 <style scoped>
 .echarts-container {
   width: 100%;
-  height: 250px;
+  height: 200px;
 }
 
 .chart {

@@ -11,7 +11,11 @@
         <BarChart :chartData="chartData" />
       </div>
       <div class="rank-table-container">
-        <el-table :data="rankData" border style="width: 100%">
+        <el-table 
+        :data="rankData" 
+        style="width: 100%" 
+        :border="false"
+        class="no-border-table el-table__row">
           <el-table-column prop="rank" label="排名" width="80" />
           <el-table-column prop="percentile" label="百分位段" width="100" />
           <el-table-column prop="assessment" label="第四轮" width="80" />
@@ -133,22 +137,27 @@ export default {
   display: flex;
   margin-bottom: 30px;
   gap: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 4px;
+  /* box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); */
 }
 
 .chart-container {
   flex: 3;
-  background: #fff;
+  /* background: #fff;
   padding: 20px;
   border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); */
 }
 
 .rank-table-container {
   flex: 1;
-  background: #fff;
-  padding: 20px;
+  padding-top: 20px;
+  /* background: #fff;
+  padding: 30px;
   border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); */
 }
 
 .tables-container {
@@ -169,4 +178,8 @@ export default {
 .el-table {
   margin-top: 10px;
 }
+
+/* 精确控制表格行高 */
+
+
 </style>
