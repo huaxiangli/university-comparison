@@ -15,7 +15,7 @@
         :data="rankData" 
         style="width: 100%" 
         :border="false"
-        class="no-border-table el-table__row">
+        class="no-border-table">
           <el-table-column prop="rank" label="排名" width="80" />
           <el-table-column prop="percentile" label="百分位段" width="100" />
           <el-table-column prop="assessment" label="第四轮" width="80" />
@@ -144,7 +144,7 @@ export default {
 }
 
 .chart-container {
-  flex: 3;
+  flex: 2;
   /* background: #fff;
   padding: 20px;
   border-radius: 4px;
@@ -153,7 +153,7 @@ export default {
 
 .rank-table-container {
   flex: 1;
-  padding-top: 20px;
+  padding-top: 15px;
   /* background: #fff;
   padding: 30px;
   border-radius: 4px;
