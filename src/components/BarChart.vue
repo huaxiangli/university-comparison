@@ -33,7 +33,10 @@ export default {
   props: {
     chartData: {
       type: Object,
-      required: true
+      required: true,
+      validator: (value) => {
+        return value.labels && value.datasets
+      }
     }
   },
   computed: {
@@ -46,8 +49,12 @@ export default {
         '人才培养': '#73C0DE'
       }
 
-      // 计算最大值的120%作为x轴最大值，确保所有数据都能完整显示
-      const maxValue = Math.max(...this.chartData.datasets.flatMap(d => d.data)) * 4
+      // 计算最大值
+      const maxDataValue = Math.max(
+        ...this.chartData.datasets.flatMap(d => d.data),
+        ...this.chartData.datasets.map(d => d.total || 0)
+      )
+      const maxValue = Math.ceil(maxDataValue * 1.2)
 
       return {
         title: {
@@ -62,6 +69,23 @@ export default {
           trigger: 'axis',
           axisPointer: {
             type: 'shadow'
+          },
+          formatter: params => {
+            const schoolIndex = params[0].dataIndex
+            const schoolName = this.chartData.datasets[schoolIndex].label
+            let result = `<strong>${schoolName}</strong><br/>`
+            
+            // 显示各项指标值
+            params.forEach(item => {
+              if (item.seriesName !== 'background') {
+                result += `${item.marker} ${item.seriesName}: ${item.value}<br/>`
+              }
+            })
+            
+            // 显示总计
+            const total = this.chartData.datasets[schoolIndex].total || 0
+            result += `<hr style="margin: 5px 0;border-top: 1px solid #eee;"/>总计: ${total}分`
+            return result
           }
         },
         legend: {
@@ -77,49 +101,86 @@ export default {
         yAxis: {
           type: 'category',
           data: this.chartData.datasets.map(item => item.label),
+          inverse: true,
           axisLine: {
-            show: false // 隐藏轴线
+            show: false
           },
           axisTick: {
-            show: false // 隐藏刻度线
+            show: false
           },
           splitLine: {
-            show: false // 隐藏网格线
+            show: false
           }
         },
         xAxis: {
           type: 'value',
-          boundaryGap: [0, 0.01],
-          max: 500,
+          max: maxValue,
           axisLine: {
-            show: false // 隐藏轴线
+            show: false
           },
           axisTick: {
-            show: false // 隐藏刻度线
+            show: false
           },
           splitLine: {
-            show: false // 隐藏网格线
+            show: false
           },
           axisLabel: {
-            show: false // 隐藏数值标签
+            show: false
           }
         },
-        series: this.chartData.labels.map((label, index) => ({
-          name: label,
-          type: 'bar',
-          stack: 'total',
-          barWidth: '60%',
-          itemStyle: {
-            color: indicatorColors[label]
-          },
-          label: {
-            show: true,
-            position: 'inside',
-            formatter: '{c}'
-          },
-          data: this.chartData.datasets.map(item => item.data[index]),
-          
-        })),
+        series: [
+          // 实际数据系列（必须先声明）
+          ...this.chartData.labels.map((label, labelIndex) => ({
+            name: label,
+            type: 'bar',
+            stack: 'total',
+            barWidth: '60%',
+            itemStyle: {
+              color: indicatorColors[label],
+              borderRadius: [0, 4, 4, 0]
+            },
+            label: {
+              show: true,
+              position: 'inside',
+              formatter: '{c}',
+              color: '#fff'
+            },
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.3)'
+              }
+            },
+            data: this.chartData.datasets.map(dataset => dataset.data[labelIndex])
+          })),
+          // 背景系列（必须最后声明）
+          {
+            name: 'background',
+            type: 'bar',
+            stack: 'total',
+            barWidth: '60%',
+            silent: true,
+            itemStyle: {
+              color: '#F8F8F8',
+              borderColor: '#E6E6E6',
+              borderWidth: 1
+            },
+            label: {
+              show: true,
+              position: 'insideLeft',  // 修改为内部左侧
+              formatter: (params) => {
+                const dataset = this.chartData.datasets[params.dataIndex]
+                return `${dataset.total || 0}分`  // 修改为"xxx分"格式
+              },
+              fontSize: 12,
+              color: '#666',
+              fontWeight: 'bold',
+              offset: [10, 0]  // 向右偏移10像素
+            },
+            data: this.chartData.datasets.map(() => maxValue)
+          }
+        ]
       }
     }
   }
@@ -129,7 +190,7 @@ export default {
 <style scoped>
 .echarts-container {
   width: 100%;
-  height: 190px;
+  height: 200px;
 }
 
 .chart {

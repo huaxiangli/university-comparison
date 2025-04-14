@@ -13,9 +13,7 @@
       <div class="rank-table-container">
         <el-table 
         :data="rankData" 
-        style="width: 100%" 
-        :border="false"
-        class="no-border-table">
+        :border="false">
           <el-table-column prop="rank" label="排名" width="80" />
           <el-table-column prop="percentile" label="百分位段" width="100" />
           <el-table-column prop="assessment" label="第四轮" width="80" />
@@ -77,17 +75,17 @@ export default {
           {
             label: '复旦大学',
             data: [45, 120, 80, 93, 52],
-            total: 390
+            total: 390  // 添加总计值
           },
           {
             label: '杭州电子科技大学',
             data: [48, 137, 40, 54, 77],
-            total: 356
+            total: 356  // 添加总计值
           },
           {
             label: '南京理工大学',
-            data: [49, 117, 115, 22, 88],
-            total: 303
+            data: [49, 117, 0, 115, 22],
+            total: 303  // 添加总计值
           }
         ]
       },
@@ -135,7 +133,7 @@ export default {
 
 .chart-and-table {
   display: flex;
-  margin-bottom: 30px;
+  margin-bottom: 50px;
   gap: 20px;
   background: #fff;
   padding: 20px;
@@ -158,8 +156,11 @@ export default {
   padding: 30px;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); */
-}
 
+}
+.el-table--fit .el-table__inner-wrapper:before {
+    width: 0% !important;
+}
 .tables-container {
   margin-top: 30px;
 }
