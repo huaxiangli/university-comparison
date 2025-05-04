@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import SchoolComparison from './components/SchoolComparison.vue'
+import SchoolComparison from './components/SchoolComparison2.vue'
 
 export default {
   components: {
