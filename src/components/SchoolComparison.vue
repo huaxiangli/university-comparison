@@ -14,6 +14,7 @@
         </el-button>
       </div>
 
+
     <el-dialog
       v-model="dialogVisible"
       title="选择学科进行展示"
@@ -71,7 +72,6 @@
                     :disabled="discipline.disabled"
                   >
                     {{ discipline.code }} {{ discipline.name }}
-                    <span v-if="discipline.disabled" class="disabled-note">(仅展示)</span>
                   </el-radio>
                 </div>
               </div>
@@ -101,7 +101,6 @@
                     :disabled="discipline.disabled"
                   >
                     {{ discipline.code }} {{ discipline.name }}
-                    <span v-if="discipline.disabled" class="disabled-note">(仅展示)</span>
                   </el-radio>
                 </div>
               </div>
@@ -120,59 +119,185 @@
 
 
     <div v-if="currentlySelectedDisciplines && allData[currentlySelectedDisciplines]" class="tables-container">
-      <div class="discipline-comparison-section">
+      <el-tabs v-model="activeTab" class="discipline-tabs" @tab-click="handleTabClick">
+          <el-tab-pane label="全部指标" name="all"></el-tab-pane>
+
+          <el-tab-pane
+              v-for="(header, index) in dynamicTabHeaders"
+              :key="index"
+              :label="header"
+              :name="header"
+          ></el-tab-pane>
+          <el-tab-pane label="定位标杆" name="benchmark"></el-tab-pane>
+      </el-tabs>
+      <!-- <div class="discipline-comparison-section">
+          </div> -->
+      <div v-if="activeTab === 'all'" class="tables-container">
+
+
+        <el-card shadow="never" class="data-card">
+          <!-- 图例 -->
+          <div
+              class="legend"
+              style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 16px;"
+          >
+            <!-- 人才培养质量：蓝 -->
+            <span style="display: flex; align-items: center; font-weight: bold;">
+              <span
+                  style="
+                  display: inline-block;
+                  width: 12px;
+                  height: 12px;
+                  background: #409EFF;
+                  margin-right: 6px;
+                "
+              ></span>
+              人才培养质量
+            </span>
+
+            <!-- 师资队伍与资源：绿 -->
+            <span style="display: flex; align-items: center; font-weight: bold;">
+              <span
+                  style="
+                  display: inline-block;
+                  width: 12px;
+                  height: 12px;
+                  background: #67C23A;
+                  margin-right: 6px;
+                "
+              ></span>
+              师资队伍与资源
+            </span>
+
+            <!-- 科学研究水平：橙 -->
+            <span style="display: flex; align-items: center; font-weight: bold;">
+              <span
+                  style="
+                  display: inline-block;
+                  width: 12px;
+                  height: 12px;
+                  background: #E6A23C;
+                  margin-right: 6px;
+                "
+              ></span>
+              科学研究水平
+            </span>
           </div>
 
-      <el-card shadow="never" class="data-card">
-        <h3>人才培养质量</h3>
-        <el-table :data="allData[currentlySelectedDisciplines].talentData" border style="width: 100%">
-          <el-table-column
-            v-for="(header, index) in allData[currentlySelectedDisciplines].talentHeaders"
-            :key="index"
-            :prop="`col${index}`"
-            :label="header"
-            :min-width="index === 0 ? '180px' : '120px'"
-          >
-              <template #default="scope">
-               {{ scope.row[index] }}
-              </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
 
-      <el-card shadow="never" class="data-card">
-        <h3>师资队伍与资源</h3>
-        <el-table :data="allData[currentlySelectedDisciplines].teacherData" border style="width: 100%">
-          <el-table-column
-            v-for="(header, index) in allData[currentlySelectedDisciplines].teacherHeaders"
-            :key="index"
-            :prop="`col${index}`"
-            :label="header"
-            :min-width="index === 0 ? '180px' : '120px'"
-          >
-              <template #default="scope">
-               {{ scope.row[index] }}
-              </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
 
-      <el-card shadow="never" class="data-card">
-        <h3>科学研究水平</h3>
-        <el-table :data="allData[currentlySelectedDisciplines].researchData" border style="width: 100%">
-          <el-table-column
-            v-for="(header, index) in allData[currentlySelectedDisciplines].researchHeaders"
-            :key="index"
-            :prop="`col${index}`"
-            :label="header"
-            :min-width="index === 0 ? '180px' : '120px'"
+          <el-table
+              :data="allData[currentlySelectedDisciplines].allData"
+              border
+              class="tableStyle"
+              :span-method="tableSpanMethod"
+              :cell-style="{ fontWeight: 'bold' }"
           >
+
+            <el-table-column label="核心指标" align="center" :header-cell-style="{ fontWeight: 'bold' }">
+              <!-- 子列1 -->
+              <el-table-column
+                  width="150"
+                  align="center"
+              >
+                <template #default="{ row, $index }">
+                  <span v-if="$index < 5" style="color: #409EFF;">人才培养质量</span>
+                  <span v-else-if="$index < 10" style="color: #67C23A;" >师资队伍与资源</span>
+                  <span v-else style="color: #E6A23C;">科学研究水平</span>
+                </template>
+              </el-table-column>
+              <!-- 子列2 -->
+              <el-table-column
+                  prop="col0"
+                  min-width="180px"
+                  align="center"
+              >
+                <template #default="scope">
+                  {{ scope.row[0] }}
+                </template>
+              </el-table-column>
+            </el-table-column>
+
+
+            <!-- 其他列 -->
+            <el-table-column
+                v-for="(header, idx) in allData[currentlySelectedDisciplines].allHeaders.slice(1)"
+                :key="idx+1"
+                :prop="`col${idx+1}`"
+                :label="header"
+                :min-width="(idx+1) === 0 ? '180px' : '120px'"
+                align="center"
+            >
               <template #default="scope">
-               {{ scope.row[index] }}
+                {{ scope.row[idx+1] }}
               </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
+            </el-table-column>
+          </el-table>
+        </el-card>
+
+
+      </div>
+
+
+
+
+<!--        <el-card shadow="never" class="data-card">-->
+<!--          <h3>人才培养质量</h3>-->
+<!--          <el-table :data="allData[currentlySelectedDisciplines].talentData" border style="width: 100%">-->
+<!--            <el-table-column-->
+<!--              v-for="(header, index) in allData[currentlySelectedDisciplines].talentHeaders"-->
+<!--              :key="index"-->
+<!--              :prop="`col${index}`"-->
+<!--              :label="header"-->
+<!--              :min-width="index === 0 ? '180px' : '120px'"-->
+<!--            >-->
+<!--                <template #default="scope">-->
+<!--                {{ scope.row[index] }}-->
+<!--                </template>-->
+<!--            </el-table-column>-->
+<!--          </el-table>-->
+<!--        </el-card>-->
+
+<!--        <el-card shadow="never" class="data-card">-->
+<!--          <h3>师资队伍与资源</h3>-->
+<!--          <el-table :data="allData[currentlySelectedDisciplines].teacherData" border style="width: 100%">-->
+<!--            <el-table-column-->
+<!--              v-for="(header, index) in allData[currentlySelectedDisciplines].teacherHeaders"-->
+<!--              :key="index"-->
+<!--              :prop="`col${index}`"-->
+<!--              :label="header"-->
+<!--              :min-width="index === 0 ? '180px' : '120px'"-->
+<!--            >-->
+<!--                <template #default="scope">-->
+<!--                {{ scope.row[index] }}-->
+<!--                </template>-->
+<!--            </el-table-column>-->
+<!--          </el-table>-->
+<!--        </el-card>-->
+
+<!--        <el-card shadow="never" class="data-card">-->
+<!--          <h3>科学研究水平</h3>-->
+<!--          <el-table :data="allData[currentlySelectedDisciplines].researchData" border style="width: 100%">-->
+<!--            <el-table-column-->
+<!--              v-for="(header, index) in allData[currentlySelectedDisciplines].researchHeaders"-->
+<!--              :key="index"-->
+<!--              :prop="`col${index}`"-->
+<!--              :label="header"-->
+<!--              :min-width="index === 0 ? '180px' : '120px'"-->
+<!--            >-->
+<!--                <template #default="scope">-->
+<!--                {{ scope.row[index] }}-->
+<!--                </template>-->
+<!--            </el-table-column>-->
+<!--          </el-table>-->
+<!--        </el-card>-->
+<!--        </div>-->
+
+
+        <!-- Placeholder text when a dynamic tab is active -->
+        <div v-else class="no-data-placeholder">
+          <p>目前无数据</p>
+        </div>
     </div>
 
     <div v-else>
@@ -196,10 +321,11 @@ import {
     ElTable,
     ElTableColumn,
     ElAlert,
-    // Components from the merged modal
     ElDialog,
     ElRadioGroup,
     ElRadio,
+    ElTabs,       
+    ElTabPane,   
 } from 'element-plus';
 
 
@@ -215,6 +341,8 @@ export default {
     ElDialog,
     ElRadioGroup,
     ElRadio,
+    ElTabs,       
+    ElTabPane,  
   },
   data() {
     return {
@@ -225,6 +353,7 @@ export default {
       // --- Data properties related to the modal's internal state ---
       dialogVisible: false, // Controls the internal visibility of the el-dialog
       selectedDiscipline: null, // Local state for the discipline selected within the modal
+      activeTab: 'all', // Default active tab in the tabs component
     };
   },
    computed: {
@@ -234,17 +363,25 @@ export default {
       },
       // Split disciplines into THREE rows based on the total number of DISCIPLINES
       disciplinesRow1() {
-          console.log(this.splitDisciplinesIntoRows(3)[0]);
           return this.splitDisciplinesIntoRows(3)[0];
       },
        disciplinesRow2() {
-          console.log(this.splitDisciplinesIntoRows(3)[1]);
           return this.splitDisciplinesIntoRows(3)[1];
        },
        disciplinesRow3() {
-          console.log(this.splitDisciplinesIntoRows(3)[2]);
           return this.splitDisciplinesIntoRows(3)[2];
-       }
+       },
+       dynamicTabHeaders() {
+            // Only compute if a discipline is selected and data is available
+            if (this.currentlySelectedDisciplines && this.allData[this.currentlySelectedDisciplines]) {
+                const headers = this.allData[this.currentlySelectedDisciplines].talentHeaders;
+                // Return headers from the third column (index 2) onwards
+                return headers ? headers.slice(2) : [];
+            }
+            return [];
+        },
+
+
    },
   watch: {
     showDisciplineModal(newValue) {
@@ -269,17 +406,51 @@ export default {
      dialogVisible(newValue) {
          this.showDisciplineModal = newValue;
      },
+    // Watch for discipline change to reset active tab
+    currentlySelectedDisciplines(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                this.activeTab = 'all'; // Reset to "全部指标" when discipline changes
+            }
+        }
   },
   created() {
     if (compareData) {
        this.allData = compareData;
-       console.log("Loaded allData:", this.allData);
+       console.log("Loaded allData");
+       console.log(this.allData)
     } else {
        console.error("compareData or compareData['A+'] is not available. Please check the data source.");
        this.allData = {};
     }
   },
   methods: {
+    tableSpanMethod({ rowIndex, columnIndex }) {
+      // 只对“分组列”（也就是第一列）做行合并
+      if (columnIndex === 0) {
+        // “人才培养质量”要合并前 5 行
+        if (rowIndex === 0) return [5, 1];
+        if (rowIndex > 0 && rowIndex < 5) return [0, 0];
+        // “师资队伍与资源”合并行 6～10
+        if (rowIndex === 5) return [5, 1];
+        if (rowIndex > 5 && rowIndex < 10) return [0, 0];
+        // “科学研究水平”合并行 11～18（总数 18 行，此处共 8 行）
+        if (rowIndex === 10) return [8, 1];
+        if (rowIndex > 10 && rowIndex < 18) return [0, 0];
+      }
+      // 其它列不合并
+      return [1, 1];
+    },
+
+    handleTabClick(tab) {
+    // 在这里可以添加 Tab 切换时的额外逻辑
+    // 注意：v-model 已经更新了 activeTab 的值，通常无需在此方法内再次更新 activeTab
+    console.log('标签页被点击了:', tab.props.name);
+
+    // 示例：如果需要在 Tab 切换时执行一些异步操作
+    // if (tab.props.name !== 'all') {
+    //   this.loadTabData(tab.props.name);
+    // }
+  },
     handleClose() {
         this.dialogVisible = false;
     },
@@ -344,12 +515,8 @@ export default {
 </script>
 
 <style scoped>
-.comparison-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
+
+
 
 .header {
   text-align: center;
@@ -369,12 +536,14 @@ export default {
 }
 
 .header-actions {
-    display: flex; /* 使用 Flexbox 布局容器 */
-    align-items: flex-start; /* 垂直居中对齐子元素 */
-    gap: 20px; /* 子元素之间的间距 */
-    flex-wrap: wrap; /* 允许项目换行 */
-    justify-content: flex-start; /* 在小屏幕上居中 */
-    margin-bottom: 20px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 0;
+  gap: 20px;
+  margin-bottom: 10px;
 }
 
 .selected-discipline-info {
@@ -415,6 +584,7 @@ export default {
 
 .data-card {
   margin-bottom: 30px;
+  margin-top: 20px;
 }
 
 .data-card h3 {
@@ -464,6 +634,11 @@ export default {
     border: none;
     border-top: 1px solid #eee;
     margin: 10px 0; /* Space above and below the separator */
+}
+
+.discipline-tabs {
+    margin-top: 20px; /* Space above the tabs */
+    margin-bottom: 20px; /* Space between tabs and tables */
 }
 
 
@@ -521,5 +696,26 @@ export default {
     /* Add padding to the bottom of the scrollable area if needed */
     padding-bottom: 20px; /* Example padding */
 }
+.no-data-placeholder {
+    text-align: center;
+    padding: 40px 0;
+    color: #999; /* A muted color for placeholder text */
+    font-size: 18px;
+}
+
+.tableStyle {
+  width: 100%;
+}
+
+.tableStyle ::v-deep .el-table__header-wrapper tr:nth-child(2) th:nth-child(1),
+.tableStyle ::v-deep .el-table__header-wrapper tr:nth-child(2) th:nth-child(2) {
+  display: none;
+}
+
+.tableStyle ::v-deep .el-table__header-wrapper th {
+  font-weight: bold;
+  color: #000000;
+}
+
 
 </style>

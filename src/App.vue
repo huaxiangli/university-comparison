@@ -1,7 +1,7 @@
 <template>
   <el-container>
     <el-main>
-      <el-card class="comparison-container">
+      <el-card class="comparison-container" :body-style="{padding: '40px'}">
         <SchoolComparison />
       </el-card>
     </el-main>
@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import SchoolComparison from './components/SchoolComparison6.vue'
+import SchoolComparison from './components/SchoolComparison.vue'
 
 export default {
   components: {
@@ -20,7 +20,13 @@ export default {
 
 <style scoped>
 .comparison-container {
+
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+
+
 }
+
+
 </style>
